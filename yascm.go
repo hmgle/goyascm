@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -762,11 +763,9 @@ func main() {
 	definePrim(genv)
 	addVariable(genv, makeSymbol("else"), ELSE)
 	fmt.Fprint(os.Stderr, "welcome\n> ")
-	var obj *Object
+	reader := bufio.NewReader(os.Stdin)
 	for NOT_END {
-		// TODO
-		// yyparse(&obj)
-		objectPrint(eval(genv, obj))
+		objectPrint(eval(genv, read(reader)))
 		fmt.Printf("\n> ")
 	}
 }
