@@ -486,7 +486,7 @@ func primSet(env, args *Object) *Object {
 }
 
 func isFalse(obj *Object) bool {
-	if obj.Type != BOOL || !obj.BoolVal {
+	if obj.Type != BOOL || obj.BoolVal {
 		return false
 	}
 	return true
