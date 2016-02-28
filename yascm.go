@@ -717,7 +717,7 @@ func definePrim(env *Object) {
 	addPrimitive(env, "define", primDefine, KEYWORD)
 	addPrimitive(env, "lambda", primLambda, KEYWORD)
 	addPrimitive(env, "let", primLet, KEYWORD)
-	addPrimitive(env, "set", primSet, KEYWORD)
+	addPrimitive(env, "set!", primSet, KEYWORD)
 	addPrimitive(env, "and", primAnd, KEYWORD)
 	addPrimitive(env, "or", primOr, KEYWORD)
 	addPrimitive(env, "begin", primBegin, KEYWORD)
