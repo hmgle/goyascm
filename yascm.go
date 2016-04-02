@@ -764,8 +764,12 @@ func main() {
 	addVariable(genv, makeSymbol("else"), ELSE)
 	fmt.Fprint(os.Stderr, "welcome\n> ")
 	reader := bufio.NewReader(os.Stdin)
+	yascmLex := &scmLex{
+		input: *reader,
+	}
 	for NOT_END {
-		objectPrint(eval(genv, read(reader)))
+		scmParse(yascmLex)
+		objectPrint(eval(genv, yascmLex.obj))
 		fmt.Printf("\n> ")
 	}
 }
