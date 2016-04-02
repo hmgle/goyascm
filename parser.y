@@ -219,10 +219,15 @@ func parseSymbol(c rune, input *bufio.Reader, lval *scmSymType) int {
 }
 
 func parseStr(c rune, input *bufio.Reader, lval *scmSymType) int {
-	// FIXME: not support \"
 	buf := ""
 	for {
 		n, _, _ := input.ReadRune()
+		if n == '\\' {
+			buf += string(n)
+			n2, _, _ := input.ReadRune()
+			buf += string(n2)
+			continue
+		}
 		if n == '"' {
 			input.UnreadRune()
 			break
