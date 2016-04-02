@@ -114,7 +114,7 @@ func (l *scmLex) Lex(lval *scmSymType) int {
       case '\'':
 	 return QUOTE
       case '#':
-	 return parseBool(l.input)
+	 return parseBoolOrChar(l.input, lval)
       case ' ', '\t', '\n': // do nothing with white space
 	 continue
       case ';': // Scheme comment
@@ -184,7 +184,7 @@ func parseNum(c rune, input bufio.Reader, lval *scmSymType) int {
     return FIXNUM_T
 }
 
-func parseBool(input bufio.Reader) int {
+func parseBoolOrChar(input bufio.Reader, lval *scmSymType) int {
    var nextRune rune
    nextRune, _, _ = input.ReadRune()
    switch nextRune {
@@ -192,6 +192,10 @@ func parseBool(input bufio.Reader) int {
       return FALSE_T
    case 't':
       return TRUE_T
+   case '\\':
+      c, _, _ := input.ReadRune()
+      lval.c = c
+      return CHAR_T
    }
    fmt.Errorf("syntax error\n")
    return FALSE_T
