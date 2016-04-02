@@ -114,7 +114,14 @@ func (l *scmLex) Lex(lval *scmSymType) int {
       case '\'':
 	 return QUOTE
       case '#':
-	 return parseBool(l.input, lval)
+	 return parseBool(l.input)
+      case ' ', '\t', '\n': // do nothing with white space
+	 continue
+      case ';': // Scheme comment
+	 eatLine(l.input)
+	 continue
+      case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+	 return parseNum(nextRune, l.input, lval)
       }
    }
    return -1
@@ -124,15 +131,66 @@ func (l *scmLex) Error(e string) {
     log.Fatal(e)
 }
 
-func parseBool(input bufio.Reader, lval *scmSymType) int {
+func eatLine(input bufio.Reader) {
+    input.ReadLine()
+}
+
+func isDigit(val rune) bool {
+	if val >= '0' && val <= '9' {
+		return true
+	} else {
+		return false
+	}
+}
+
+func isSpace(val rune) bool {
+	if val == '\t' || val == '\n' || val == '\r' || val == ' ' {
+		return true
+	}
+	return false
+}
+
+// EOF is also a delimiter
+func isDelimiter(val rune) bool {
+	if isSpace(val) || val == '(' || val == ')' ||
+		val == '"' || val == ';' || val == 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
+func parseNum(c rune, input bufio.Reader, lval *scmSymType) int {
+    sign := 1
+    if c == '-' {
+	sign = -1
+    } else {
+	input.UnreadRune()
+    }
+    var num int64
+    var n rune
+    for {
+	n, _, _ = input.ReadRune()
+	if !isDigit(n) {
+	    break
+	}
+	diff := n - '0'
+	num = (num * 10) + int64(diff)
+    }
+    if isDelimiter(n) {
+        input.UnreadRune()
+    }
+    lval.n = num * int64(sign)
+    return FIXNUM_T
+}
+
+func parseBool(input bufio.Reader) int {
    var nextRune rune
-   nextRune, _, _ =input.ReadRune()
+   nextRune, _, _ = input.ReadRune()
    switch nextRune {
    case 'f':
-      lval.v = makeBool(false)
       return FALSE_T
    case 't':
-      lval.v = makeBool(true)
       return TRUE_T
    }
    fmt.Errorf("syntax error\n")
