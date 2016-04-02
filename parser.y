@@ -132,6 +132,9 @@ func (l *scmLex) Lex(lval *scmSymType) int {
 			case '"':
 				status = StringStatus
 				return DOUBLE_QUOTE 
+			default:
+				// FIXME: symbol [!$%&*+\-./:<=>?@^_~[:alnum:]]
+				return parseSymbol(nextRune, &l.input, lval)
 			}
 		} else if status == StringStatus {
 			switch nextRune {
@@ -177,6 +180,42 @@ func isDelimiter(val rune) bool {
 	} else {
 		return false
 	}
+}
+
+func isAlpha(val rune) bool {
+	if (val >= 'a' && val <= 'z') ||
+		(val >= 'A' && val <= 'Z') {
+		return true
+	} else {
+		return false
+	}
+}
+
+func isInitial(val rune) bool {
+	if isAlpha(val) ||
+		val == '*' || val == '/' ||
+		val == '+' || val == '-' ||
+		val == '>' || val == '<' ||
+		val == '=' || val == '?' ||
+		val == '!' {
+		return true
+	} else {
+		return false
+	}
+}
+
+func parseSymbol(c rune, input *bufio.Reader, lval *scmSymType) int {
+	var n rune
+	buf := string(c)
+	for {
+		n, _, _ = input.ReadRune()
+		if !(isInitial(n) || isDigit(n)) {
+			break
+		}
+		buf += string(n)
+	}
+	lval.s =  buf
+	return SYMBOL_T
 }
 
 func parseStr(c rune, input *bufio.Reader, lval *scmSymType) int {
