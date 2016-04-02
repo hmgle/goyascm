@@ -83,6 +83,13 @@ object: TRUE_T		{$$ = makeBool(true);}
 
 %%
 
+const (
+    Initial = iota
+    StringStatus
+)
+
+var status = Initial
+
 type token struct {
     tok int
     val interface{}
@@ -94,8 +101,8 @@ type scmLex struct {
 }
 
 func (l *scmLex) Lex(lval *scmSymType) int {
-   var nextRune rune
-   var err error
+    var nextRune rune
+    var err error
     for {
       nextRune, _, err = l.input.ReadRune()
       if err == io.EOF {
@@ -103,25 +110,37 @@ func (l *scmLex) Lex(lval *scmSymType) int {
       } else if err != nil {
 	 fmt.Errorf("syntax error: %v\n", err)
       }
-
-      switch nextRune {
-      case '(':
-	 return LP
-      case ')':
-	 return RP
-      case '.':
-	 return DOT
-      case '\'':
-	 return QUOTE
-      case '#':
-	 return parseBoolOrChar(l.input, lval)
-      case ' ', '\t', '\n': // do nothing with white space
-	 continue
-      case ';': // Scheme comment
-	 eatLine(l.input)
-	 continue
-      case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-	 return parseNum(nextRune, l.input, lval)
+      if status == Initial {
+          switch nextRune {
+          case '(':
+             return LP
+          case ')':
+             return RP
+          case '.':
+             return DOT
+          case '\'':
+             return QUOTE
+          case '#':
+             return parseBoolOrChar(&l.input, lval)
+          case ' ', '\t', '\n': // do nothing with white space
+             continue
+          case ';': // Scheme comment
+             eatLine(&l.input)
+             continue
+          case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+             return parseNum(nextRune, &l.input, lval)
+          case '"':
+	     status = StringStatus
+             return DOUBLE_QUOTE 
+          }
+      } else if status == StringStatus {
+	  switch nextRune {
+	  case '"':
+	      status = Initial
+              return DOUBLE_QUOTE 
+          default:
+              return parseStr(nextRune, &l.input, lval)
+	  }
       }
    }
    return -1
@@ -131,7 +150,7 @@ func (l *scmLex) Error(e string) {
     log.Fatal(e)
 }
 
-func eatLine(input bufio.Reader) {
+func eatLine(input *bufio.Reader) {
     input.ReadLine()
 }
 
@@ -160,7 +179,22 @@ func isDelimiter(val rune) bool {
 	}
 }
 
-func parseNum(c rune, input bufio.Reader, lval *scmSymType) int {
+func parseStr(c rune, input *bufio.Reader, lval *scmSymType) int {
+    // FIXME: not support \"
+    buf := ""
+    for {
+        n, _, _ := input.ReadRune()
+	if n == '"' {
+            input.UnreadRune()
+	    break
+	}
+	buf += string(n)
+    }
+    lval.s = string(c) + buf
+    return STRING_T
+}
+
+func parseNum(c rune, input *bufio.Reader, lval *scmSymType) int {
     sign := 1
     if c == '-' {
 	sign = -1
@@ -184,7 +218,7 @@ func parseNum(c rune, input bufio.Reader, lval *scmSymType) int {
     return FIXNUM_T
 }
 
-func parseBoolOrChar(input bufio.Reader, lval *scmSymType) int {
+func parseBoolOrChar(input *bufio.Reader, lval *scmSymType) int {
    var nextRune rune
    nextRune, _, _ = input.ReadRune()
    switch nextRune {
