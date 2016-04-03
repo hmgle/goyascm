@@ -1,5 +1,7 @@
 # goyascm
 
+[![Build Status](https://travis-ci.org/hmgle/goyascm.png?branch=master)](https://travis-ci.org/hmgle/goyascm)
+
 Yet Another Scheme Interpreter writen in Go. It is ported from [yascm](https://github.com/hmgle/yascm).
 
 ## Building
