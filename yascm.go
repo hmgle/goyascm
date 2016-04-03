@@ -683,17 +683,36 @@ func primIsNumGt(env, args *Object) *Object {
 	return makeBool(true)
 }
 
-// TODO
-// func loadFile(fileName string, env *Object) *Object {
-// }
+func loadFile(fileName string, env *Object) *Object {
+	f, err := os.Open(fileName)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fopen() %s fail: %v\n", fileName, err)
+		return NIL
+	}
+	defer f.Close()
+	reader := bufio.NewReader(f)
+	yascmLex := &scmLex{
+		input: *reader,
+	}
+	for NOT_END {
+		scmParse(yascmLex)
+		obj := eval(env, yascmLex.obj)
+		if obj == nil || obj == NIL {
+			break
+		}
+		objectPrint(obj)
+	}
+	fmt.Fprintf(os.Stderr, "; done loading %s\n", fileName)
+	return OK
+}
 
 func primEval(env, args *Object) *Object {
 	return eval(env, car(args))
 }
 
-// TODO
-// func primLoad(env, args *Object) *Object {
-// }
+func primLoad(env, args *Object) *Object {
+	return loadFile(car(args).StrVal, env)
+}
 
 // TODO
 // func primRead(env, args *Object) *Object {
@@ -747,7 +766,7 @@ func definePrim(env *Object) {
 	addPrimitive(env, "=", primIsNumEq, PRIM)
 	addPrimitive(env, ">", primIsNumGt, PRIM)
 	addPrimitive(env, "eval", primEval, PRIM)
-	// addPrimitive(env, "load", primLoad, PRIM)
+	addPrimitive(env, "load", primLoad, PRIM)
 	// addPrimitive(env, "read", primRead, PRIM)
 	addPrimitive(env, "display", primDisplay, PRIM)
 	addPrimitive(env, "newline", primNewline, PRIM)
@@ -762,11 +781,13 @@ func main() {
 	SymbolTable = NIL
 	definePrim(genv)
 	addVariable(genv, makeSymbol("else"), ELSE)
+	loadFile("stdlib.scm", genv)
 	fmt.Fprint(os.Stderr, "welcome\n> ")
 	reader := bufio.NewReader(os.Stdin)
 	yascmLex := &scmLex{
 		input: *reader,
 	}
+	NOT_END = true
 	for NOT_END {
 		scmParse(yascmLex)
 		objectPrint(eval(genv, yascmLex.obj))

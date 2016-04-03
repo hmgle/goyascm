@@ -2,7 +2,7 @@ TARGET=goyascm
 
 all:: $(TARGET)
 
-goyascm: parser.go
+goyascm: parser.go yascm.go
 	go build
 
 parser.go: parser.y

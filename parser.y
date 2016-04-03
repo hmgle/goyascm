@@ -49,7 +49,7 @@ top: object {
 		scmlex.(*scmLex).obj = $1;
 		return 0
 	}
-	| END_OF_FILE {eof_handle();}
+	| END_OF_FILE {eof_handle(); return 0}
 
 string: DOUBLE_QUOTE STRING_T DOUBLE_QUOTE {$$ = $2;}
 	| DOUBLE_QUOTE DOUBLE_QUOTE {$$ = "\"";}
@@ -128,7 +128,7 @@ func (l *scmLex) Lex(lval *scmSymType) int {
 				eatLine(&l.input)
 				continue
 			case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-				return parseNum(nextRune, &l.input, lval)
+				return parseNumOrSub(nextRune, &l.input, lval)
 			case '"':
 				status = StringStatus
 				return DOUBLE_QUOTE 
@@ -238,9 +238,14 @@ func parseStr(c rune, input *bufio.Reader, lval *scmSymType) int {
 	return STRING_T
 }
 
-func parseNum(c rune, input *bufio.Reader, lval *scmSymType) int {
+func parseNumOrSub(c rune, input *bufio.Reader, lval *scmSymType) int {
 	sign := 1
 	if c == '-' {
+		x, _, _ := input.ReadRune()
+		if isDelimiter(x) {
+			lval.s =  "-"
+			return SYMBOL_T
+		}
 		sign = -1
 	} else {
 		input.UnreadRune()
