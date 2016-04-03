@@ -247,6 +247,7 @@ func parseNumOrSub(c rune, input *bufio.Reader, lval *scmSymType) int {
 			lval.s =  "-"
 			return SYMBOL_T
 		}
+		input.UnreadRune()
 		sign = -1
 	} else {
 		input.UnreadRune()
