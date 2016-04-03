@@ -713,9 +713,15 @@ func primLoad(env, args *Object) *Object {
 	return loadFile(car(args).StrVal, env)
 }
 
-// TODO
-// func primRead(env, args *Object) *Object {
-// }
+func primRead(env, args *Object) *Object {
+	// TODO: Not only os.Stdin
+	reader := bufio.NewReader(os.Stdin)
+	yascmLex := &scmLex{
+		input: *reader,
+	}
+	scmParse(yascmLex)
+	return yascmLex.obj
+}
 
 func primDisplay(env, args *Object) *Object {
 	if args.Car.Type == STRING {
@@ -766,7 +772,7 @@ func definePrim(env *Object) {
 	addPrimitive(env, ">", primIsNumGt, PRIM)
 	addPrimitive(env, "eval", primEval, PRIM)
 	addPrimitive(env, "load", primLoad, PRIM)
-	// addPrimitive(env, "read", primRead, PRIM)
+	addPrimitive(env, "read", primRead, PRIM)
 	addPrimitive(env, "display", primDisplay, PRIM)
 	addPrimitive(env, "newline", primNewline, PRIM)
 }
