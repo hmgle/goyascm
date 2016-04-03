@@ -700,7 +700,6 @@ func loadFile(fileName string, env *Object) *Object {
 		if obj == nil || obj == NIL {
 			break
 		}
-		objectPrint(obj)
 	}
 	fmt.Fprintf(os.Stderr, "; done loading %s\n", fileName)
 	return OK
