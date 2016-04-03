@@ -197,7 +197,9 @@ func isInitial(val rune) bool {
 		val == '+' || val == '-' ||
 		val == '>' || val == '<' ||
 		val == '=' || val == '?' ||
-		val == '!' {
+		val == '%' || val == '&' ||
+		val == ':' || val == '~' ||
+		val == '!' || val == '^' {
 		return true
 	} else {
 		return false
