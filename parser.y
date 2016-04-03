@@ -210,6 +210,7 @@ func parseSymbol(c rune, input *bufio.Reader, lval *scmSymType) int {
 	for {
 		n, _, _ = input.ReadRune()
 		if !(isInitial(n) || isDigit(n)) {
+			input.UnreadRune()
 			break
 		}
 		buf += string(n)
