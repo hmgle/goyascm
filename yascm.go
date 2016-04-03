@@ -702,6 +702,7 @@ func loadFile(fileName string, env *Object) *Object {
 		}
 	}
 	fmt.Fprintf(os.Stderr, "; done loading %s\n", fileName)
+	NOT_END = true
 	return OK
 }
 
