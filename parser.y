@@ -243,11 +243,11 @@ func parseNumOrSub(c rune, input *bufio.Reader, lval *scmSymType) int {
 	sign := 1
 	if c == '-' {
 		x, _, _ := input.ReadRune()
+		input.UnreadRune()
 		if isDelimiter(x) {
 			lval.s =  "-"
 			return SYMBOL_T
 		}
-		input.UnreadRune()
 		sign = -1
 	} else {
 		input.UnreadRune()
