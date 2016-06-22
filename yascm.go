@@ -1,5 +1,7 @@
 package main
 
+//go:generate go tool yacc -p "scm" -o parser.go parser.y
+
 import (
 	"bufio"
 	"fmt"

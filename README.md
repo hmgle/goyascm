@@ -9,7 +9,8 @@ Yet Another Scheme Interpreter writen in Go. It is ported from [yascm](https://g
 ```
 git clone https://github.com/hmgle/goyascm.git
 cd goyascm
-make
+go generate
+go build
 ```
 
 ## Examples
