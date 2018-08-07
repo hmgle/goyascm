@@ -4,4 +4,6 @@ go:
         - 1.6
         - tip
 
-script: make
+script:
+        - go get github.com/golang/tools/cmd/goyacc
+        - make
