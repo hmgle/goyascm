@@ -7,7 +7,7 @@ Yet Another Scheme Interpreter writen in Go. It is ported from [yascm](https://g
 ## Building
 
 ```
-go get github.com/golang/tools/cmd/goyacc
+go install golang.org/x/tools/cmd/goyacc@v0.1.8
 git clone https://github.com/hmgle/goyascm.git
 cd goyascm
 go generate
